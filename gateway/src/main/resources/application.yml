@@ -13,18 +13,27 @@ spring:
              enabled: true
              lower-case-service-id: true
          routes:
-           - id: product-dynamic
+           - id: product-static
              uri: lb://PRODUCT-SERVICE
              predicates:
                - Path=/products
              filters:
-               - RewritePath=/products, /api/v1/products
-           - id: product-dynamic
-             uri: lb://PRODUCT-SERVICE
-             predicates:
-               - Path=/products/**
-             filters:
-               - RewritePath=/products/(?<segment>.*), /api/v1/${segment}
+               - name: CustomPath
+                 args:
+                   newPath: /api/v1/products
+
+#           - id: product-static
+#             uri: lb://PRODUCT-SERVICE
+#             predicates:
+#               - Path=/products
+#             filters:
+#               - RewritePath=/products, /api/v1/products
+#           - id: product-dynamic
+#             uri: lb://PRODUCT-SERVICE
+#             predicates:
+#               - Path=/products/**
+#             filters:
+#               - RewritePath=/products/(?<segment>.*), /api/v1/${segment}
            # if you want to filter you still have to do it manually
 #           - id: product-root
 #             uri: lb://PRODUCT-SERVICE
@@ -54,8 +63,12 @@ spring:
 ##               - RemoveRequestHeader=key
 #               - PrefixPath=/api/v1/
 #               - RewritePath=/products/(?<segment>), products/${segment}
+logging:
+  level:
+    reactor.netty.http.client: DEBUG
+    org.springframework.cloud.gateway: TRACE
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-
